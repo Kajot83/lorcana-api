@@ -1,4 +1,4 @@
-const axios = require("axios");
+import axios from "axios";
 
 async function importCards() {
   try {
@@ -15,7 +15,6 @@ async function importCards() {
 
     console.log("Pobrano HTML strony, długość:", html.length);
 
-    // test – tylko sprawdzamy czy działa
     if (html.includes("lorcana")) {
       console.log("Strona zawiera dane kart ✔");
     } else {
