@@ -1,0 +1,1 @@
+{\n  "name": "lorcana-api",\n  "version": "1.0.0",\n  "description": "Lorcana API",\n  "main": "server.js",\n  "scripts": {\n    "start": "node server.js",\n    "dev": "nodemon server.js"\n  },\n  "keywords": [],\n  "author": "",\n  "license": "ISC",\n  "dependencies": {}\n}
