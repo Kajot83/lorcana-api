@@ -1,14 +1,15 @@
 import fs from "fs";
 import path from "path";
-import mysql from "mysql2/promise";
+import pkg from "pg";
+const { Client } = pkg;
 
-// Konfiguracja bazy
-const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-};
+// konfiguracja z Render ENV
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 async function importCards() {
   try {
@@ -17,22 +18,28 @@ async function importCards() {
     const filePath = path.resolve("./cards.json");
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
-    const connection = await mysql.createConnection(dbConfig);
+    await client.connect();
 
     for (const card of data) {
       const { name, color, cost, text, image, translation } = card;
 
-      await connection.execute(
+      await client.query(
         `INSERT INTO cards (name, color, cost, text, image, translation)
-         VALUES (?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE color=?, cost=?, text=?, image=?, translation=?`,
-        [name, color, cost, text, image, translation, color, cost, text, image, translation]
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (name)
+         DO UPDATE SET
+           color = EXCLUDED.color,
+           cost = EXCLUDED.cost,
+           text = EXCLUDED.text,
+           image = EXCLUDED.image,
+           translation = EXCLUDED.translation`,
+        [name, color, cost, text, image, translation]
       );
 
       console.log(`Dodano kartę: ${name}`);
     }
 
-    await connection.end();
+    await client.end();
     console.log("Import zakończony.");
     process.exit();
   } catch (err) {
