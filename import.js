@@ -15,10 +15,24 @@ async function importCards() {
   try {
     console.log("Start importu kart z cards.json...");
 
+    // podłączamy się do bazy
+    await client.connect();
+
+    // tworzymy tabelę jeśli nie istnieje
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS cards (
+        id SERIAL PRIMARY KEY,
+        name TEXT UNIQUE,
+        color TEXT,
+        cost INTEGER,
+        text TEXT,
+        image TEXT,
+        translation TEXT
+      )
+    `);
+
     const filePath = path.resolve("./cards.json");
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-
-    await client.connect();
 
     for (const card of data) {
       const { name, color, cost, text, image, translation } = card;
