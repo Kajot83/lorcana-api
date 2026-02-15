@@ -6,15 +6,13 @@ import cardsRoutes from "./routes/cards.js";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 
 app.use("/cards", cardsRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Lorcana API działa");
-});
-
-app.listen(3000, () => {
-  console.log("Server start na porcie 3000");
+app.listen(PORT, () => {
+  console.log(`Server uruchomiony na porcie ${PORT}`);
 });
