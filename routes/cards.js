@@ -14,5 +14,6 @@
     "text": "Ice magic ability",
     "image": "https://example.com/elsa.png",
     "translation": "Elsa - Królowa Śniegu"
-  }
+     }
+  export default cardsRoutes;
 ]
