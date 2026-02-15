@@ -3,11 +3,11 @@ import path from "path";
 import pkg from "pg";
 const { Client } = pkg;
 
-// konfiguracja z Render ENV
+// Połączenie z Postgres z Render
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: false, // wymagane w Render dla darmowych baz
   },
 });
 
@@ -15,10 +15,10 @@ async function importCards() {
   try {
     console.log("Start importu kart z cards.json...");
 
-    // podłączamy się do bazy
+    // Połącz z bazą
     await client.connect();
 
-    // tworzymy tabelę jeśli nie istnieje
+    // Tworzymy tabelę jeśli nie istnieje
     await client.query(`
       CREATE TABLE IF NOT EXISTS cards (
         id SERIAL PRIMARY KEY,
@@ -30,10 +30,13 @@ async function importCards() {
         translation TEXT
       )
     `);
+    console.log("Tabela cards gotowa.");
 
+    // Wczytaj plik z kartami
     const filePath = path.resolve("./cards.json");
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
+    // Import kart
     for (const card of data) {
       const { name, color, cost, text, image, translation } = card;
 
@@ -54,7 +57,7 @@ async function importCards() {
     }
 
     await client.end();
-    console.log("Import zakończony.");
+    console.log("Import zakończony!");
     process.exit();
   } catch (err) {
     console.error("Błąd importu:", err);
