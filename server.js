@@ -16,6 +16,18 @@ app.get("/", (req, res) => {
 
 app.use("/cards", cardsRoutes);
 
+app.get("/lorcana-api", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM cards"); // zakładam, że masz tabelę `cards`
+    res.json(result.rows); // zwraca tablicę kart w formacie JSON
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Błąd pobierania kart" });
+  }
+});
+
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server działa na porcie " + PORT);
