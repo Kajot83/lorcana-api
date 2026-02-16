@@ -1,51 +1,49 @@
 import axios from "axios";
 import pkg from "pg";
+const { Client } = pkg;
 
-const { Pool } = pkg;
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const dbConfig = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+};
 
 export async function importFromAPI() {
+  const client = new Client(dbConfig);
+  await client.connect();
+
   let page = 1;
   let hasMore = true;
 
+  console.log("Start importu kart z API...");
+
   while (hasMore) {
-    const res = await axios.get(
-      `https://api.lorcana-api.com/cards/all?page=${page}`
-    );
+    const res = await axios.get(`https://api.lorcana-api.com/cards/all?page=${page}`);
+    const cards = res.data.data || [];
 
-    const cards = res.data.cards;
-
-    if (!cards || cards.length === 0) {
+    if (!cards.length) {
       hasMore = false;
       break;
     }
 
     for (const card of cards) {
-      console.log("Zapisano kartę:", card.name);
+      const { name, color, cost, text, image, translation } = card;
 
-      await pool.query(
-        `
-        INSERT INTO cards (name, color, cost, image)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT DO NOTHING
-        `,
-        [
-          card.name,
-          card.color,
-          card.cost,
-          card.images?.full || null
-        ]
+      // Wstawiamy tylko jeśli karta nie istnieje w bazie
+      await client.query(
+        `INSERT INTO cards (name, color, cost, text, image, translation)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (name) DO NOTHING`,
+        [name, color, cost, text, image, translation]
       );
+
+      console.log(`Sprawdzono kartę: ${name}`);
     }
 
     page++;
   }
 
-  console.log("Import zakończony");
+  await client.end();
+  console.log("Import zakończony ✅");
 }
