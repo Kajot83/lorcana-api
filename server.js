@@ -19,3 +19,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server działa na porcie " + PORT);
 });
+cron.schedule("0 3 * * *", () => {
+  console.log("Auto aktualizacja kart...");
+  importFromAPI();
+});
