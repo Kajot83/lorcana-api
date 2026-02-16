@@ -21,4 +21,15 @@ router.get("/", async (req, res) => {
   res.render("cards", { cards: result.rows });
 });
 
+router.get("/api", async (req, res) => {
+  const client = new Client(dbConfig);
+  await client.connect();
+
+  const result = await client.query("SELECT * FROM cards ORDER BY name");
+  await client.end();
+
+  res.json(result.rows); // zwraca wszystkie karty w JSON
+});
+
+
 export default router;
