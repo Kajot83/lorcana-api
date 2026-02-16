@@ -24,3 +24,4 @@ cron.schedule("0 3 * * *", () => {
   console.log("Auto aktualizacja kart...");
   importFromAPI();
 });
+app.use(express.static("public")); // folder z index.html
